@@ -41,6 +41,7 @@ dependencies:
   flutter_polyline_points: ^0.2.4
   flutter_geofire: ^1.0.3
   firebase_messaging: ^7.0.3
+  assets_audio_player: ^2.0.13+1
 
 
 
@@ -77,6 +78,7 @@ flutter:
      - images/redmarker.png
      - images/taxi.png
      - images/user_icon.png
+     - sounds/alert.mp3
 
   # To add assets to your application, add an assets section, like this:
   # assets:

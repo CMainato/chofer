@@ -1,8 +1,12 @@
+
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:drivers_app/Models/rideDetails.dart';
+import 'package:drivers_app/Notificatiosn/notificationDialog.dart';
 import 'package:drivers_app/configMaps.dart';
 import 'package:drivers_app/main.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'dart:io'show Platform;
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,17 +14,17 @@ class PushNotificationService
 {
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 
-  Future initialize() async {
+  Future initialize(context) async {
 
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async{
-        retrieveRideRequestInfo(getRideRequestId(message));
+        retrieveRideRequestInfo(getRideRequestId(message),context);
       },
       onLaunch: (Map<String, dynamic> message) async{
-        retrieveRideRequestInfo(getRideRequestId(message));
+        retrieveRideRequestInfo(getRideRequestId(message),context);
       },
       onResume: (Map<String, dynamic> message) async{
-        retrieveRideRequestInfo(getRideRequestId(message));
+        retrieveRideRequestInfo(getRideRequestId(message),context);
       },
     );
   }
@@ -46,12 +50,15 @@ class PushNotificationService
     return rideRequesId;
   }
 
-  void retrieveRideRequestInfo(String rideRequestId)
+  void retrieveRideRequestInfo(String rideRequestId, BuildContext context)
   {
     newRequestsRef.child(rideRequestId).once().then((DataSnapshot dataSnapShot)
     {
       if(dataSnapShot.value != null)
       {
+
+        assetsAudioPlayer.open(Audio("sounds/alert.mp3"));
+        assetsAudioPlayer.play();
         double pickUpLocationLat = double.parse(dataSnapShot.value['pickup']['latitude'].toString());
         double pickUpLocationLng = double.parse(dataSnapShot.value['pickup']['longitude'].toString());
         String pickUpAddress = dataSnapShot.value['pickup_addres'].toString();
@@ -74,6 +81,13 @@ class PushNotificationService
         print(rideDetails.pickup_addres);
         print(rideDetails.dropoff_addres);
 
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) =>NotificationDialog(rideDetails: rideDetails,),
+
+
+        );
       }
     });
   }
