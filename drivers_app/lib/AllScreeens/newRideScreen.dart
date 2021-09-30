@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:drivers_app/AllWidgets/progressDialog.dart';
+import 'package:drivers_app/Assistants/CollectFareDialog.dart';
 import 'package:drivers_app/Assistants/assistantMethods.dart';
 import 'package:drivers_app/Assistants/mapKitAssistant.dart';
 import 'package:drivers_app/Models/rideDetails.dart';
 import 'package:drivers_app/configMaps.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -185,7 +187,7 @@ import '../main.dart';
                      Row(
                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                        children: [
-                         Text("Edison Jumbo", style: TextStyle(
+                         Text(widget.rideDetails.rider_name, style: TextStyle(
                              fontFamily: "Brand-Blod", fontSize: 24.0),),
                          Padding(
                            padding: EdgeInsets.only(right: 10.0),
@@ -202,7 +204,7 @@ import '../main.dart';
                          Expanded(
                            child: Container(
                              child: Text(
-                               "Cotocollao, Quito, Ecuador",
+                               widget.rideDetails.pickup_addres,
                                style: TextStyle(fontSize: 18.0),
                                overflow: TextOverflow.ellipsis,
                              ),
@@ -221,7 +223,7 @@ import '../main.dart';
                          Expanded(
                            child: Container(
                              child: Text(
-                               "La Florida, Quito, Ecuador",
+                               widget.rideDetails.dropoff_addres,
                                style: TextStyle(fontSize: 18.0),
                                overflow: TextOverflow.ellipsis,
                              ),
@@ -410,7 +412,8 @@ import '../main.dart';
      });
    }
 
-   void acceptRideRequest() {
+   void acceptRideRequest()
+   {
      String rideRequestId = widget.rideDetails.ride_request_id;
      newRequestsRef.child(rideRequestId).child("status").set("accepted");
      newRequestsRef.child(rideRequestId).child("driver_name").set(
@@ -428,6 +431,9 @@ import '../main.dart';
        "longitude": currentPosition.longitude.toString(),
      };
      newRequestsRef.child(rideRequestId).child("driver_location").set(locMap);
+
+     driversRef.child(currentfirebaseUser.uid).child("history").child(rideRequestId).set(true);
+
    }
 
    void updateRideDetails() async
@@ -490,6 +496,44 @@ import '../main.dart';
      newRequestsRef.child(rideRequestId).child("fares").set(fareAmount.toString());
      newRequestsRef.child(rideRequestId).child("status").set("ended");
      rideStreamSubscription.cancel();
+
+     showDialog(
+       context: context,
+       barrierDismissible: false,
+       builder: (BuildContext context) => CollectFareDialog(paymentMethod: widget.rideDetails.payment_method, fareAmount: fareAmount,),
+
+     );
+
+     saveEarnings(fareAmount);
+
    }
+
+   void saveEarnings(int fareAmount){
+     driversRef.child(currentfirebaseUser.uid).child("earnings").once().then((DataSnapshot dataSnapShot){
+       if(dataSnapShot.value != null)
+         {
+           double oldEarnings = double.parse(dataSnapShot.value.toString());
+           double totalEarnings = fareAmount + oldEarnings;
+
+           driversRef.child(currentfirebaseUser.uid).child("earnings").set(totalEarnings.toStringAsFixed(2));
+         }
+       else
+         {
+           double totalEarnings = fareAmount.toDouble();
+           driversRef.child(currentfirebaseUser.uid).child("earnings").set(totalEarnings.toStringAsFixed(2));
+         }
+     });
+   }
+
  }
+
+
+
+
+
+
+
+
+
+
  
