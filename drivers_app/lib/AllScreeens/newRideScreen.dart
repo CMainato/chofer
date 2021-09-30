@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:drivers_app/AllWidgets/progressDialog.dart';
 import 'package:drivers_app/Assistants/assistantMethods.dart';
+import 'package:drivers_app/Assistants/mapKitAssistant.dart';
 import 'package:drivers_app/Models/rideDetails.dart';
 import 'package:drivers_app/configMaps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../main.dart';
@@ -27,8 +29,7 @@ import '../main.dart';
 
 
  
- class _NewRideScreenState extends State<NewRideScreen>
- {
+ class _NewRideScreenState extends State<NewRideScreen> {
    Completer<GoogleMapController> _controllerGoogleMap = Completer();
    GoogleMapController newRideGoogleMapController;
 
@@ -38,18 +39,86 @@ import '../main.dart';
    List<LatLng> polylineCorOrdinates = [];
    PolylinePoints polylinePoints = PolylinePoints();
    double mapPaddingFromBottom = 0;
+   var geolocator = Geolocator();
+   var locationOptions = LocationOptions(
+       accuracy: LocationAccuracy.bestForNavigation);
+   BitmapDescriptor animatingMarkerIcon;
+   Position myPostion;
+   String status = "accepted";
+   String durationRide = "";
+   bool isRequestingDirection = false;
+   String btnTitle = "Arrived";
+   Color btnColor = Colors.indigo;
+   Timer timer;
+   int durationCounter = 0;
 
    @override
-  void initState() {
+   void initState() {
+     super.initState();
 
-    super.initState();
+     acceptRideRequest();
+   }
 
-    acceptRideRequest();
-  }
+   void createIconMarker() {
+     if (animatingMarkerIcon == null) {
+       ImageConfiguration imageConfiguration = createLocalImageConfiguration(
+           context, size: Size(2, 2));
+       BitmapDescriptor.fromAssetImage(
+           imageConfiguration, "images/car_android.png")
+           .then((value) {
+         animatingMarkerIcon = value;
+       });
+     }
+   }
+
+   void getRideLiveLocationUpdates() {
+     LatLng oldPos = LatLng(0, 0);
+
+     rideStreamSubscription =
+         Geolocator.getPositionStream().listen((Position position) {
+           currentPosition = position;
+           myPostion = position;
+           LatLng mPostion = LatLng(position.latitude, position.longitude);
+
+           var rot = MapKitAssistant.getMarkerRotation(
+               oldPos.latitude, oldPos.longitude, myPostion.latitude,
+               myPostion.latitude);
+           Marker animatingMarker = Marker(
+             markerId: MarkerId("animating"),
+             position: mPostion,
+             rotation: rot,
+             icon: animatingMarkerIcon,
+
+             infoWindow: InfoWindow(title: "Current Location"),
+           );
+
+           setState(() {
+             CameraPosition cameraPosition = new CameraPosition(
+                 target: mPostion, zoom: 17);
+             newRideGoogleMapController.animateCamera(
+                 CameraUpdate.newCameraPosition(cameraPosition));
+
+             markersSet.removeWhere((marker) =>
+             marker.markerId.value == "animating");
+             markersSet.add(animatingMarker);
+           });
+           oldPos = mPostion;
+           updateRideDetails();
+           String rideRequestId = widget.rideDetails.ride_request_id;
+           Map locMap =
+           {
+             "latitude": currentPosition.latitude.toString(),
+             "longitude": currentPosition.longitude.toString(),
+           };
+           newRequestsRef.child(rideRequestId).child("driver_location").set(
+               locMap);
+         });
+   }
 
 
    @override
    Widget build(BuildContext context) {
+     createIconMarker();
      return Scaffold(
        body: Stack(
          children: [
@@ -72,22 +141,25 @@ import '../main.dart';
                  mapPaddingFromBottom = 265.0;
                });
 
-               var currentLatLng = LatLng(currentPosition.latitude, currentPosition.longitude);
+               var currentLatLng = LatLng(
+                   currentPosition.latitude, currentPosition.longitude);
                var pickUpLatLng = widget.rideDetails.pickup;
 
                await getPlaceDirection(currentLatLng, pickUpLatLng);
+               getRideLiveLocationUpdates();
              },
            ),
 
            Positioned(
              left: 0.0,
-           right: 0.0,
-           bottom: 0.0,
-           child: Container(
-             decoration: BoxDecoration(
-               color: Colors.white,
-               borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)),
-               boxShadow:
+             right: 0.0,
+             bottom: 0.0,
+             child: Container(
+               decoration: BoxDecoration(
+                 color: Colors.white,
+                 borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0),
+                     topRight: Radius.circular(16.0)),
+                 boxShadow:
                  [
                    BoxShadow(
                      color: Colors.black38,
@@ -96,100 +168,149 @@ import '../main.dart';
                      offset: Offset(0.7, 0.7),
                    ),
                  ],
-                ),
-                height: 270.0,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 18.0),
-                child: Column(
-                    children: [
-                      Text(
-                        "10 mins",
-                        style: TextStyle(fontSize: 14.0, fontFamily: "Brand-Blod", color: Colors.deepPurple),
-                      ),
-                      SizedBox(height: 6.0,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Edison Jumbo", style: TextStyle(fontFamily: "Brand-Blod", fontSize: 24.0),),
-                            Padding(
-                                padding: EdgeInsets.only(right: 10.0),
-                                child: Icon(Icons.phone_android),
-                            ),
-                          ],
-                        ),
-                       SizedBox(height: 26.0,),
-                      Row(
-                        children: [
-                          Image.asset("images/pickicon.png", height: 16.0, width: 16.0,),
-                          SizedBox(width: 18.0,),
-                          Expanded(
-                              child: Container(
-                                child: Text(
-                                  "Cotocollao, Quito, Ecuador",
-                                  style: TextStyle(fontSize: 18.0),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 16.0,),
-
-                       Row(
-                         children: [
-                           Image.asset("images/desticon.png", height: 16.0, width: 16.0,),
-                           SizedBox(width: 18.0,),
-                           Expanded(
-                             child: Container(
-                               child: Text(
-                                 "La Florida, Quito, Ecuador",
-                                 style: TextStyle(fontSize: 18.0),
-                                 overflow: TextOverflow.ellipsis,
-                               ),
+               ),
+               height: 270.0,
+               child: Padding(
+                 padding: EdgeInsets.symmetric(
+                     horizontal: 24.0, vertical: 18.0),
+                 child: Column(
+                   children: [
+                     Text(
+                       durationRide,
+                       style: TextStyle(fontSize: 14.0,
+                           fontFamily: "Brand-Blod",
+                           color: Colors.deepPurple),
+                     ),
+                     SizedBox(height: 6.0,),
+                     Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       children: [
+                         Text("Edison Jumbo", style: TextStyle(
+                             fontFamily: "Brand-Blod", fontSize: 24.0),),
+                         Padding(
+                           padding: EdgeInsets.only(right: 10.0),
+                           child: Icon(Icons.phone_android),
+                         ),
+                       ],
+                     ),
+                     SizedBox(height: 26.0,),
+                     Row(
+                       children: [
+                         Image.asset(
+                           "images/pickicon.png", height: 16.0, width: 16.0,),
+                         SizedBox(width: 18.0,),
+                         Expanded(
+                           child: Container(
+                             child: Text(
+                               "Cotocollao, Quito, Ecuador",
+                               style: TextStyle(fontSize: 18.0),
+                               overflow: TextOverflow.ellipsis,
                              ),
                            ),
-                         ],
-                       ),
-                      SizedBox(height: 26.0,),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
-                          child: RaisedButton(
-                            onPressed: ()
-                            {
+                         ),
+                       ],
+                     ),
 
-                            },
-                            color: Theme.of(context).accentColor,
-                            child: Padding(
-                              padding: EdgeInsets.all(17.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Llegó", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white),),
-                                  Icon(Icons.directions_car, color: Colors.white, size: 26.0,),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ),
-                    ],
-                ),
-              ),
-            ),
+                     SizedBox(height: 16.0,),
+
+                     Row(
+                       children: [
+                         Image.asset(
+                           "images/desticon.png", height: 16.0, width: 16.0,),
+                         SizedBox(width: 18.0,),
+                         Expanded(
+                           child: Container(
+                             child: Text(
+                               "La Florida, Quito, Ecuador",
+                               style: TextStyle(fontSize: 18.0),
+                               overflow: TextOverflow.ellipsis,
+                             ),
+                           ),
+                         ),
+                       ],
+                     ),
+                     SizedBox(height: 26.0,),
+                     Padding(
+                       padding: EdgeInsets.symmetric(horizontal: 16.0),
+                       child: RaisedButton(
+                         onPressed: () async
+                         {
+                           if(status == "accepted")
+                           {
+                             status = "arrived";
+                             String rideRequestId = widget.rideDetails.ride_request_id;
+                             newRequestsRef.child(rideRequestId).child("status").set(status);
+
+                             setState(() {
+                               btnTitle = "Start Trip";
+                               btnColor = Colors.purple;
+                             });
+
+                             showDialog(
+                               context: context,
+                               barrierDismissible: false,
+                               builder: (BuildContext context)=> ProgressDialog(message: "Please wait...",),
+                             );
+
+                             await getPlaceDirection(widget.rideDetails.pickup, widget.rideDetails.dropoff);
+
+                             Navigator.pop(context);
+                           }
+                           else if(status == "arrived")
+                           {
+                             status = "onride";
+                             String rideRequestId = widget.rideDetails.ride_request_id;
+                             newRequestsRef.child(rideRequestId).child("status").set(status);
+
+                             setState(() {
+                               btnTitle = "End Trip";
+                               btnColor = Colors.redAccent;
+                             });
+
+                             initTimer();
+                           }
+                           else if(status == "onride")
+                           {
+                             endTheTrip();
+                           }
+                         },
+                         color: btnColor,
+                         child: Padding(
+                           padding: EdgeInsets.all(17.0),
+                           child: Row(
+                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                             children: [
+                               Text(btnTitle, style: TextStyle(fontSize: 20.0,
+                                   fontWeight: FontWeight.bold,
+                                   color: Colors.white),),
+                               Icon(Icons.directions_car, color: Colors.white,
+                                 size: 26.0,),
+                             ],
+                           ),
+                         ),
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+             ),
            ),
          ],
        ),
      );
    }
 
-   Future<void> getPlaceDirection(LatLng pickUpLatLng, LatLng dropOffLatLng) async
+   Future<void> getPlaceDirection(LatLng pickUpLatLng,
+       LatLng dropOffLatLng) async
    {
      showDialog(
          context: context,
-         builder: (BuildContext context) => ProgressDialog(message: "Espere por favor... ")
+         builder: (BuildContext context) =>
+             ProgressDialog(message: "Espere por favor... ")
      );
 
-     var details = await AssistantMethods.obtainPlaceDirectionDetails(pickUpLatLng, dropOffLatLng);
+     var details = await AssistantMethods.obtainPlaceDirectionDetails(
+         pickUpLatLng, dropOffLatLng);
 
      Navigator.pop(context);
 
@@ -197,14 +318,15 @@ import '../main.dart';
      print(details.encodedPoints);
 
      PolylinePoints polylinePoints = PolylinePoints();
-     List<PointLatLng> decodedPolyLinePointsResult = polylinePoints.decodePolyline(details.encodedPoints);
+     List<PointLatLng> decodedPolyLinePointsResult = polylinePoints
+         .decodePolyline(details.encodedPoints);
 
      polylineCorOrdinates.clear();
 
-     if(decodedPolyLinePointsResult.isNotEmpty)
-     {
+     if (decodedPolyLinePointsResult.isNotEmpty) {
        decodedPolyLinePointsResult.forEach((PointLatLng pointLatLng) {
-         polylineCorOrdinates.add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+         polylineCorOrdinates.add(
+             LatLng(pointLatLng.latitude, pointLatLng.longitude));
        });
      }
 
@@ -226,21 +348,26 @@ import '../main.dart';
      });
 
      LatLngBounds latLngBounds;
-     if(pickUpLatLng.latitude > dropOffLatLng.latitude && pickUpLatLng.longitude > dropOffLatLng.longitude)
-     {
-       latLngBounds = LatLngBounds(southwest: dropOffLatLng, northeast: pickUpLatLng);
+     if (pickUpLatLng.latitude > dropOffLatLng.latitude &&
+         pickUpLatLng.longitude > dropOffLatLng.longitude) {
+       latLngBounds =
+           LatLngBounds(southwest: dropOffLatLng, northeast: pickUpLatLng);
      }
-     else if(pickUpLatLng.longitude > dropOffLatLng.longitude)
-     {
-       latLngBounds = LatLngBounds(southwest: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude), northeast: LatLng(dropOffLatLng.latitude, pickUpLatLng.longitude));
-     }else if(pickUpLatLng.latitude > dropOffLatLng.latitude)
-     {
-       latLngBounds = LatLngBounds(southwest: LatLng(dropOffLatLng.latitude, pickUpLatLng.longitude), northeast: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude));
-     }else{
-       latLngBounds = LatLngBounds(southwest: pickUpLatLng, northeast: dropOffLatLng);
+     else if (pickUpLatLng.longitude > dropOffLatLng.longitude) {
+       latLngBounds = LatLngBounds(
+           southwest: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude),
+           northeast: LatLng(dropOffLatLng.latitude, pickUpLatLng.longitude));
+     } else if (pickUpLatLng.latitude > dropOffLatLng.latitude) {
+       latLngBounds = LatLngBounds(
+           southwest: LatLng(dropOffLatLng.latitude, pickUpLatLng.longitude),
+           northeast: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude));
+     } else {
+       latLngBounds =
+           LatLngBounds(southwest: pickUpLatLng, northeast: dropOffLatLng);
      }
 
-     newRideGoogleMapController.animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 70));
+     newRideGoogleMapController.animateCamera(
+         CameraUpdate.newLatLngBounds(latLngBounds, 70));
 
      Marker pickUpLocMarker = Marker(
        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
@@ -283,23 +410,86 @@ import '../main.dart';
      });
    }
 
-   void acceptRideRequest()
-   {
+   void acceptRideRequest() {
      String rideRequestId = widget.rideDetails.ride_request_id;
      newRequestsRef.child(rideRequestId).child("status").set("accepted");
-     newRequestsRef.child(rideRequestId).child("driver_name").set(driversInformation.name);
-     newRequestsRef.child(rideRequestId).child("driver_phone").set(driversInformation.phone);
-     newRequestsRef.child(rideRequestId).child("driver_id").set(driversInformation.id);
-     newRequestsRef.child(rideRequestId).child("car:details").set('${driversInformation.car_color} - ${driversInformation.car_model}');
+     newRequestsRef.child(rideRequestId).child("driver_name").set(
+         driversInformation.name);
+     newRequestsRef.child(rideRequestId).child("driver_phone").set(
+         driversInformation.phone);
+     newRequestsRef.child(rideRequestId).child("driver_id").set(
+         driversInformation.id);
+     newRequestsRef.child(rideRequestId).child("car:details").set(
+         '${driversInformation.car_color} - ${driversInformation.car_model}');
 
      Map locMap =
-         {
-           "latitude": currentPosition.latitude.toString(),
-           "longitude": currentPosition.longitude.toString(),
-         };
+     {
+       "latitude": currentPosition.latitude.toString(),
+       "longitude": currentPosition.longitude.toString(),
+     };
      newRequestsRef.child(rideRequestId).child("driver_location").set(locMap);
+   }
 
+   void updateRideDetails() async
+   {
+     if (isRequestingDirection == false) {
+       isRequestingDirection = true;
 
+       if (myPostion == null) {
+         return;
+       }
+
+       var posLatLng = LatLng(myPostion.latitude, myPostion.longitude);
+       LatLng destinationLatLng;
+
+       if (status == "accepted") {
+         destinationLatLng = widget.rideDetails.pickup;
+       }
+       else {
+         destinationLatLng = widget.rideDetails.dropoff;
+       }
+
+       var directionDetails = await AssistantMethods
+           .obtainPlaceDirectionDetails(posLatLng, destinationLatLng);
+       if (directionDetails != null) {
+         setState(() {
+           durationRide = directionDetails.durationText;
+         });
+       }
+
+       isRequestingDirection = false;
+     }
+   }
+
+   void initTimer() {
+     const interval = Duration(seconds: 1);
+     timer = Timer.periodic(interval, (timer) {
+       durationCounter = durationCounter + 1;
+     });
+   }
+
+   endTheTrip() async
+   {
+     timer.cancel();
+
+     showDialog(
+       context: context,
+       barrierDismissible: false,
+       builder: (BuildContext context) =>
+           ProgressDialog(message: "Espere porfavor...",),
+     );
+     var currentLatLng = LatLng(myPostion.latitude, myPostion.longitude);
+
+     var directionalDetails = await AssistantMethods.obtainPlaceDirectionDetails(widget.rideDetails.pickup, currentLatLng);
+
+     Navigator.pop(context);
+
+     int fareAmount = AssistantMethods.calculateFares(directionalDetails);
+
+     String rideRequestId = widget.rideDetails.ride_request_id;
+     newRequestsRef.child(rideRequestId).child("fares").set(fareAmount.toString());
+     newRequestsRef.child(rideRequestId).child("status").set("ended");
+     rideStreamSubscription.cancel();
    }
  }
  
