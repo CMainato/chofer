@@ -59,6 +59,7 @@ class PushNotificationService
 
         assetsAudioPlayer.open(Audio("sounds/alert.mp3"));
         assetsAudioPlayer.play();
+
         double pickUpLocationLat = double.parse(dataSnapShot.value['pickup']['latitude'].toString());
         double pickUpLocationLng = double.parse(dataSnapShot.value['pickup']['longitude'].toString());
         String pickUpAddress = dataSnapShot.value['pickup_addres'].toString();
@@ -67,7 +68,11 @@ class PushNotificationService
         double dropOffLocationLng = double.parse(dataSnapShot.value['dropoff']['longitude'].toString());
         String dropOffAddress = dataSnapShot.value['dropoff_addres'].toString();
 
+
         String paymentMethod = dataSnapShot.value['payment_method'].toString();
+
+        String rider_name = dataSnapShot.value["rider_name"];
+        String rider_phone = dataSnapShot.value["rider_phone"];
 
         RideDetails rideDetails = RideDetails();
         rideDetails.ride_request_id = rideRequestId;
@@ -76,6 +81,8 @@ class PushNotificationService
         rideDetails.pickup = LatLng(pickUpLocationLat, pickUpLocationLng);
         rideDetails.dropoff = LatLng(dropOffLocationLat, dropOffLocationLng);
         rideDetails.payment_method = paymentMethod;
+        rideDetails.rider_name = rider_name;
+        rideDetails.rider_phone = rider_phone;
 
         print('Information::');
         print(rideDetails.pickup_addres);
