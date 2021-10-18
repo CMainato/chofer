@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:drivers_app/AllWidgets/progressDialog.dart';
-import 'package:drivers_app/Assistants/CollectFareDialog.dart';
+import 'package:drivers_app/AllWidgets/CollectFareDialog.dart';
 import 'package:drivers_app/Assistants/assistantMethods.dart';
 import 'package:drivers_app/Assistants/mapKitAssistant.dart';
 import 'package:drivers_app/Models/rideDetails.dart';
@@ -28,9 +28,6 @@ import '../main.dart';
    _NewRideScreenState createState() => _NewRideScreenState();
  }
 
-
-
- 
  class _NewRideScreenState extends State<NewRideScreen> {
    Completer<GoogleMapController> _controllerGoogleMap = Completer();
    GoogleMapController newRideGoogleMapController;
@@ -116,7 +113,6 @@ import '../main.dart';
                locMap);
          });
    }
-
 
    @override
    Widget build(BuildContext context) {
