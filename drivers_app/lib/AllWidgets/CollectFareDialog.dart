@@ -1,4 +1,5 @@
 import 'package:drivers_app/Assistants/assistantMethods.dart';
+import 'package:drivers_app/configMaps.dart';
 import 'package:drivers_app/tabsPages/earningsTabPage.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +31,9 @@ class CollectFareDialog extends StatelessWidget
             children: [
               SizedBox(height: 22.0,),
 
-              Text("Tarifa de viaje"),
+              Text("Tarifa de viaje(" + rideType.toUpperCase() + ")"),
+
+              SizedBox(height: 22.0,),
 
               Divider(),
 

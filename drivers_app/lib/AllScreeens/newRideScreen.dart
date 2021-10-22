@@ -418,7 +418,7 @@ import '../main.dart';
          driversInformation.phone);
      newRequestsRef.child(rideRequestId).child("driver_id").set(
          driversInformation.id);
-     newRequestsRef.child(rideRequestId).child("car:details").set(
+     newRequestsRef.child(rideRequestId).child("car_details").set(
          '${driversInformation.car_color} - ${driversInformation.car_model}');
 
      Map locMap =
