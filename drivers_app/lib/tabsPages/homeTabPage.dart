@@ -44,6 +44,59 @@ class _HomeTabPageState extends State<HomeTabPage> {
     super.initState();
     getCurretDriverInfo();
   }
+getRatings(){
+  //update ratings
+  driversRef.child(currentfirebaseUser.uid).child("ratings").once().then((DataSnapshot dataSnapshot)
+  {
+    if(dataSnapshot.value != null)
+    {
+      double ratings = double.parse(dataSnapshot.value.toString());
+      setState(() {
+        starCounter = ratings;
+      });
+
+      if(starCounter <= 1.5)
+      {
+        setState(() {
+          title = "Muy Malo";
+        });
+        return;
+      }
+      if(starCounter <= 2.5)
+      {
+        setState(() {
+          title = "Malo";
+        });
+
+        return;
+      }
+      if(starCounter <= 3.5)
+      {
+        setState(() {
+          title = "Bueno";
+        });
+
+        return;
+      }
+      if(starCounter <= 4.5)
+      {
+        setState(() {
+          title = "Muy Bueno";
+        });
+        return;
+      }
+      if(starCounter <= 5.0)
+      {
+        setState(() {
+          title = "Excelente";
+        });
+
+        return;
+      }
+    }
+  });
+}
+
   void locatePosition() async
   {
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
@@ -75,6 +128,9 @@ class _HomeTabPageState extends State<HomeTabPage> {
     pushNotificationService.getToken();
 
     AssistantMethods.retrieveHistoryInfo(context);
+getRatings();
+
+
   }
   @override
   Widget build(BuildContext context)
