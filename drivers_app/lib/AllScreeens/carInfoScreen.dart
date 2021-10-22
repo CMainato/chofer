@@ -10,6 +10,8 @@ class CarInfoScreen extends StatelessWidget
   TextEditingController carModelTextEditingController = TextEditingController();
   TextEditingController carNumberTextEditingController = TextEditingController();
   TextEditingController carColorTextEditingController = TextEditingController();
+  String selectedCarType;
+  List<String> carTypesList = ["uber-x", "uber-go", "bike" ];
 
   @override
   Widget build(BuildContext context){
@@ -58,7 +60,25 @@ class CarInfoScreen extends StatelessWidget
                       style: TextStyle(fontSize:15.0),
                     ),
 
+                    SizedBox(height: 26.0,),
+
+                    DropdownButton(
+                      iconSize: 40,
+                      hint: Text("Elije tu medio de transporte"),
+                      value: selectedCarType,
+                      onChanged: (newValue){
+                        selectedCarType = newValue;
+                        displayToastMessage(selectedCarType, context);
+                      },
+                      items: carTypesList.map((car) {
+                        return DropdownMenuItem(
+                            child: new Text(car),
+                            value: car,
+                        );
+                      }).toList(),
+                    ),
                     SizedBox(height: 42.0,),
+
 
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -69,13 +89,17 @@ class CarInfoScreen extends StatelessWidget
                             {
                               displayToastMessage("Por favor ingrese el model del auto", context);
                             }
-                          if(carNumberTextEditingController.text.isEmpty)
+                          else if(carNumberTextEditingController.text.isEmpty)
                           {
                             displayToastMessage("Por favor ingrese el numero del auto", context);
                           }
-                          if(carColorTextEditingController.text.isEmpty)
+                          else if(carColorTextEditingController.text.isEmpty)
                           {
                             displayToastMessage("Por favor ingrese el color del auto", context);
+                          }
+                          else if(selectedCarType == null)
+                          {
+                            displayToastMessage("Por favor elija el tipo de auto", context);
                           }
                           else
                             {
@@ -115,6 +139,7 @@ class CarInfoScreen extends StatelessWidget
           "car_color": carColorTextEditingController.text,
           "car_number": carNumberTextEditingController.text,
           "car_model": carModelTextEditingController.text,
+          "type": selectedCarType,
         };
 
     driversRef.child(userId).child("car_details").set(carInfoMap);

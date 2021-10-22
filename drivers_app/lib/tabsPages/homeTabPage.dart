@@ -44,6 +44,22 @@ class _HomeTabPageState extends State<HomeTabPage> {
     super.initState();
     getCurretDriverInfo();
   }
+  
+  getRideType()
+  {
+    driversRef.child(currentfirebaseUser.uid).child("car_details").child("type").once().then((DataSnapshot snapshot)
+    {
+      if(snapshot.value != null )
+      {
+        setState(() {
+          rideType = snapshot.value.toString();
+        });
+
+      }
+    });
+  }
+  
+  
 getRatings(){
   //update ratings
   driversRef.child(currentfirebaseUser.uid).child("ratings").once().then((DataSnapshot dataSnapshot)
@@ -128,7 +144,8 @@ getRatings(){
     pushNotificationService.getToken();
 
     AssistantMethods.retrieveHistoryInfo(context);
-getRatings();
+    getRatings();
+    getRideType();
 
 
   }
