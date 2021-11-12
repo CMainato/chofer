@@ -66,7 +66,7 @@ class LoginScreen extends StatelessWidget {
                       controller: passwordTextEditingController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: "Contrase;a",
+                        labelText: "Contraseña",
                         labelStyle: TextStyle(
                           fontSize: 20.0,
                         ),

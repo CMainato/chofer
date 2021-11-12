@@ -1,6 +1,5 @@
 import 'package:drivers_app/Assistants/assistantMethods.dart';
 import 'package:drivers_app/configMaps.dart';
-import 'package:drivers_app/tabsPages/earningsTabPage.dart';
 import 'package:flutter/material.dart';
 
 
@@ -45,7 +44,7 @@ class CollectFareDialog extends StatelessWidget
 
               Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Text("Este es el monto total del viaje, se ha cargado al pasajero.", textAlign: TextAlign.center,),
+                  child: Text("El monto total del viaje, se ha cargado al pasajero.", textAlign: TextAlign.center,),
               ),
 
               SizedBox(height: 30.0,),

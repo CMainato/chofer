@@ -27,13 +27,13 @@ class CarInfoScreen extends StatelessWidget
                 child: Column(
                   children: [
                     SizedBox(height: 12.0,),
-                    Text("Ingrese los detalles del auto", style: TextStyle(fontFamily: "Brand-Blod", fontSize: 24.0),),
+                    Text("Ingrese los detalles del vehiculo", style: TextStyle(fontFamily: "Brand-Blod", fontSize: 24.0),),
 
                     SizedBox(height: 26.0,),
                     TextField(
                       controller: carModelTextEditingController,
                         decoration: InputDecoration(
-                          labelText:  "Modelo del auto",
+                          labelText:  "Modelo del vehículo",
                           hintStyle: TextStyle(color: Colors.grey, fontSize: 10.0),
 
                         ),
@@ -43,7 +43,7 @@ class CarInfoScreen extends StatelessWidget
                     TextField(
                       controller: carNumberTextEditingController,
                       decoration: InputDecoration(
-                        labelText:  "Numero del auto",
+                        labelText:  "Número placa del vehículo",
                         hintStyle: TextStyle(color: Colors.grey, fontSize: 10.0),
 
                       ),
@@ -53,7 +53,7 @@ class CarInfoScreen extends StatelessWidget
                     TextField(
                       controller: carColorTextEditingController,
                       decoration: InputDecoration(
-                        labelText:  "Color del auto",
+                        labelText:  "Color del vehículo",
                         hintStyle: TextStyle(color: Colors.grey, fontSize: 10.0),
 
                       ),
@@ -64,7 +64,7 @@ class CarInfoScreen extends StatelessWidget
 
                     DropdownButton(
                       iconSize: 40,
-                      hint: Text("Elije tu medio de transporte"),
+                      hint: Text("Elije tú medio de transporte"),
                       value: selectedCarType,
                       onChanged: (newValue){
                         selectedCarType = newValue;
@@ -87,19 +87,19 @@ class CarInfoScreen extends StatelessWidget
                         {
                           if(carModelTextEditingController.text.isEmpty)
                             {
-                              displayToastMessage("Por favor ingrese el model del auto", context);
+                              displayToastMessage("Por favor, Ingrese el model del vehículo", context);
                             }
                           else if(carNumberTextEditingController.text.isEmpty)
                           {
-                            displayToastMessage("Por favor ingrese el numero del auto", context);
+                            displayToastMessage("Por favor, Ingrese el número del vehículo", context);
                           }
                           else if(carColorTextEditingController.text.isEmpty)
                           {
-                            displayToastMessage("Por favor ingrese el color del auto", context);
+                            displayToastMessage("Por favor, Ingrese el color del vehículo", context);
                           }
                           else if(selectedCarType == null)
                           {
-                            displayToastMessage("Por favor elija el tipo de auto", context);
+                            displayToastMessage("Por favor, Elija el tipo de vehículo", context);
                           }
                           else
                             {

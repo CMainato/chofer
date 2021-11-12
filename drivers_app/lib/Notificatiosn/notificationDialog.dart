@@ -130,7 +130,7 @@ class NotificationDialog extends StatelessWidget {
       }
       else
       {
-        displayToastMessage("Ride not exists.", context);
+        displayToastMessage("El pasajero a cancelado el viaje.", context);
       }
 
 
@@ -143,15 +143,15 @@ class NotificationDialog extends StatelessWidget {
       }
       else if(theRideId == "cancelled")
       {
-        displayToastMessage("Ride has been Cancelled.", context);
+        displayToastMessage("El viaje se a cancelado.", context);
       }
       else if(theRideId == "timeout")
       {
-        displayToastMessage("Ride has time out.", context);
+        displayToastMessage("NO hay respuesta por parte del pasajero.", context);
       }
       else
       {
-        displayToastMessage("Ride not exists.", context);
+        displayToastMessage("El pasajero no existe.", context);
       }
     });
   }

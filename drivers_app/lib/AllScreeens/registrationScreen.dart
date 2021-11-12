@@ -135,7 +135,7 @@ class RegistrationScreen extends StatelessWidget {
                         }
                         else if(!emailTextEditingController.text.contains("@"))
                         {
-                          displayToastMessage("El correo no es valido", context);
+                          displayToastMessage("El correo no es válido", context);
                         }else if(phoneTextEditingController.text.isEmpty)
                         {
                           displayToastMessage("El número de teléfono es obligatorio", context);
@@ -194,7 +194,7 @@ class RegistrationScreen extends StatelessWidget {
         barrierDismissible: false,
         builder: (BuildContext context)
         {
-          return ProgressDialog(message: "Estamos registrando tu cuenta, por favor espera...",);
+          return ProgressDialog(message: "Estamos registrando tú cuenta, por favor espera...",);
         }
     );
 
@@ -221,7 +221,7 @@ class RegistrationScreen extends StatelessWidget {
         driversRef.child(firebaseUser.uid).set(userDataMap);
 
         currentfirebaseUser = firebaseUser;
-        displayToastMessage("Felicidades, Ahora eres parte de Gas.SA. Cuenta  creada! ", context);
+        displayToastMessage("Felicidades, Ahora eres parte de TAXI-MÓVIL. Cuenta  creada! ", context);
 
 
         Navigator.pushNamed(context, CarInfoScreen.idScreen);

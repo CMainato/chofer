@@ -207,7 +207,7 @@ getRatings(){
                       }else{
                         makeDriverOffLine();
                         setState(() {
-                          driverStatusColor = Colors.black;
+                          driverStatusColor = Colors.indigo;
                           driverStatusText = "Desconectado - Conectarse Ahora";
                           isDriverAvailable = false;
                         });

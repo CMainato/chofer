@@ -28,7 +28,7 @@ class ProfileTabPage extends StatelessWidget {
             ),
 
             Text(
-              title + " driver",
+              title + " conductor",
               style: TextStyle(
                   fontSize: 20.0,
                   color: Colors.blueGrey[200],
@@ -52,7 +52,7 @@ class ProfileTabPage extends StatelessWidget {
               text: driversInformation.phone,
               icon: Icons.phone,
               onPressed: () async {
-                print("Telefono.");
+                print("Celular.");
               },
             ),
 
@@ -68,7 +68,7 @@ class ProfileTabPage extends StatelessWidget {
               text: driversInformation.car_color + " " + driversInformation.car_model + " " + driversInformation.car_number,
               icon: Icons.car_repair,
               onPressed: () async {
-                print("Informacion del auto.");
+                print("Informacion del vehículo.");
               },
             ),
 
@@ -84,7 +84,7 @@ class ProfileTabPage extends StatelessWidget {
                 Navigator.pushNamedAndRemoveUntil(context, LoginScreen.idScreen, (route) => false);
               },
               child: Card(
-                color: Colors.red,
+                color: Colors.indigo,
                 margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 110.0),
                 child: ListTile(
                   trailing: Icon(

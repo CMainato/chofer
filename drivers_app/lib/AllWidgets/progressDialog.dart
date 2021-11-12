@@ -16,7 +16,7 @@ class ProgressDialog extends StatelessWidget
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(6.0),
+            borderRadius: BorderRadius.circular(2.0),
           ),
           child: Padding(
             padding: const EdgeInsets.all(15.0),

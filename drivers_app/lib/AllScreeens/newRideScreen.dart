@@ -312,9 +312,6 @@ import '../main.dart';
 
      Navigator.pop(context);
 
-     print("this is Encoded Points ::");
-     print(details.encodedPoints);
-
      PolylinePoints polylinePoints = PolylinePoints();
      List<PointLatLng> decodedPolyLinePointsResult = polylinePoints
          .decodePolyline(details.encodedPoints);

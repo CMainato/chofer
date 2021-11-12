@@ -31,8 +31,7 @@ class PushNotificationService
 
   Future<String> getToken() async {
     String token = await firebaseMessaging.getToken();
-    print("este es tu token");
-    print(token);
+
     driversRef.child(currentfirebaseUser.uid).child("token").set(token);
     firebaseMessaging.subscribeToTopic("alldrivers");
     firebaseMessaging.subscribeToTopic("allusers");
@@ -83,10 +82,6 @@ class PushNotificationService
         rideDetails.payment_method = paymentMethod;
         rideDetails.rider_name = rider_name;
         rideDetails.rider_phone = rider_phone;
-
-        print('Information::');
-        print(rideDetails.pickup_addres);
-        print(rideDetails.dropoff_addres);
 
         showDialog(
             context: context,
